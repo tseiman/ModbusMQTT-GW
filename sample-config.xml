@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mmgw-config>
+	<modbus>
+		<server>192.168.2.196</server>
+		<port>4567</port>
+		<poll-interval>1000</poll-interval>
+	</modbus>
+	<mqtt>
+		<server>mqtt.google.com</server>
+		<port>4567</port>
+		<mode>plain</mode>
+		<tls>false</tls>
+	</mqtt>
+	<variables>
+		<variable name="blink" modbus-addr="1234" type="BOOL" report="ONDEBUG"/>
+		<variable name="delay" modbus-addr="1235" type="BOOL" report="ONDEBUG"/>
+		<variable name="blink_run" modbus-addr="1236" type="BOOL" report="INSTANT"/>
+		<variable name="delay_run" modbus-addr="1237" type="BOOL" report="INSTANT"/>
+		<variable name="blink_count" modbus-addr="1238" type="DWORD" report="INSTANT"/>
+		<variable name="delay_count" modbus-addr="1239" type="DWORD" report="INSTANT"/>
+	</variables>
+</mmgw-config>
