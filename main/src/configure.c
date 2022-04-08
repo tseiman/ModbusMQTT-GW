@@ -64,7 +64,8 @@ static void toString() {
 	t_variable_list_P nextListElem = conf->variablelist;
 	while(nextListElem) {
 		logger(LOG_DEBUG,  \
-				"Variable: name=\"%s\" modbus-addr=\"%d\" type=\"%s\"report=\"%s\"",
+				"Variable: id=\"%d\" name=\"%s\" modbus-addr=\"%d\" type=\"%s\"report=\"%s\"",
+				nextListElem->variable.id,
 				nextListElem->variable.name,
 				nextListElem->variable.addr,
 				VariableDataTypes_STRING[nextListElem->variable.datatype],
@@ -72,6 +73,10 @@ static void toString() {
 		nextListElem = nextListElem->next;
 	}
 
+	logger(LOG_DEBUG,"index list contains the following items:");
+	for(int i = 0; i < conf->variablelistIndex.len; ++i) {
+		logger(LOG_DEBUG,"	item index=%d name=%s", i , conf->variablelistIndex.variablelistIndexed[i]->variable.name);
+	}
 }
 
 int loadConfig(char *config_file, int verbose) {
@@ -94,6 +99,7 @@ int loadConfig(char *config_file, int verbose) {
 	conf = my_malloc(sizeof(Settings));
 	conf->verbose = verbose;
 	conf->variablelist = NULL;
+	conf->variablelistIndex.variablelistIndexed = NULL;
 	conf->toString = toString;
 
 	logger(LOG_DEBUG, "Loading config file: \"%s\"", config_file);
@@ -126,15 +132,21 @@ int loadConfig(char *config_file, int verbose) {
 	mxml_node_t *iter_node;
 	xml_node = mxmlFindPath(xmltree, "mmgw-config/variables/variable/");
 
+	unsigned int variableID = 0;
 	while(xml_node) {
 		if(mxmlGetType(xml_node)  == MXML_ELEMENT) {
 			logger(LOG_DEBUG, "Loading variable %s", mxmlElementGetAttr(xml_node, "name"));
 			t_variable_list_P new_variable_element = my_malloc(sizeof(t_variable_list));
+			if(!new_variable_element) {
+				logger(LOG_ERR, "memory allocation failed - can't continue building configuration");
+				return errno;
+			}
 
 			new_variable_element->variable.name = mxmlElementGetAttr(xml_node, "name");
 			new_variable_element->variable.addr = atoi(mxmlElementGetAttr(xml_node, "modbus-addr"));
 			new_variable_element->variable.datatype = str2DataType(mxmlElementGetAttr(xml_node, "type"));
 			new_variable_element->variable.reporttype = str2ReportType(mxmlElementGetAttr(xml_node, "report"));
+			new_variable_element->variable.id = variableID;
 
 			if(conf->variablelist == NULL) {
 				new_variable_element->next = NULL;
@@ -143,6 +155,18 @@ int loadConfig(char *config_file, int verbose) {
 				new_variable_element->next = conf->variablelist;
 				conf->variablelist = new_variable_element;
 			}
+
+			t_variable_list_P *tmpIndexVar = my_realloc(conf->variablelistIndex.variablelistIndexed, (variableID + 1) * sizeof(t_variable_list_P));
+
+			if(!tmpIndexVar) {
+				logger(LOG_ERR, "memory allocation failed - can't continue building configuration");
+				return errno;
+			}
+			conf->variablelistIndex.variablelistIndexed = tmpIndexVar;
+
+			conf->variablelistIndex.variablelistIndexed[variableID] = new_variable_element;
+			++conf->variablelistIndex.len;
+			++variableID;
 		}
 		xml_node = mxmlWalkNext(xml_node, xmltree, MXML_DESCEND);
 	}
@@ -157,6 +181,7 @@ Settings_P getConfig() {
 void destroyConfig() {
 	if(xmltree) mxmlDelete(xmltree);
 	if(!conf) return;
+	if(conf->variablelistIndex.variablelistIndexed) my_free(conf->variablelistIndex.variablelistIndexed);
 	if(conf->variablelist) {
 		while(conf->variablelist) {
 			t_variable_list_P nextListElem = conf->variablelist->next;

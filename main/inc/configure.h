@@ -62,10 +62,11 @@ static const char *VariableReportTypes_STRING[] = {
 
 
 typedef struct Variable {
-  const char *name;
-  int addr;
-  t_variable_data_types datatype;
-  t_variable_report_types reporttype;
+	unsigned int id;
+	const char *name;
+	int addr;
+	t_variable_data_types datatype;
+	t_variable_report_types reporttype;
 } t_variable;
 
 
@@ -75,12 +76,18 @@ typedef struct VariableList {
 } t_variable_list;
 typedef t_variable_list *t_variable_list_P;
 
+typedef struct VariableListIndex {
+	size_t len;
+	t_variable_list_P *variablelistIndexed;
+} t_variable_list_Index;
+
 
 typedef struct Settings {
 	int verbose;
 	t_modbus_settings modbussettings;
 	t_mqtt_settings mqttsettings;
 	t_variable_list_P variablelist;
+	t_variable_list_Index variablelistIndex;
 	void (*toString)(void);
 } Settings;
 typedef Settings *Settings_P;

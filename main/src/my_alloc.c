@@ -13,6 +13,12 @@ void *my_malloc(size_t size) {
 	return ref;
 }
 
+void *my_realloc(void *ptr, size_t size) {
+	void *ref = realloc(ptr, size);
+	logger(LOG_DEBUG, "Re-Allocating %d bytes at addr %p", size , ref);
+	return ref;
+}
+
 void my_free(void * ref) {
 	logger(LOG_DEBUG, "Freeing at addr %p",  ref);
 	free(ref);
