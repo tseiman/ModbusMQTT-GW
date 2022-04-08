@@ -69,17 +69,26 @@ void *modbusPollLoop(void *vargp) {
 		while(nextListElem) {
 
 			if(nextListElem->variable.datatype == BOOL) {
-				 uint8_t dest;
+				uint8_t dest;
 				int ret = modbus_read_bits(mb,nextListElem->variable.addr, 1, &dest);
-				logger(LOG_DEBUG, "Bool Variable: name=\"%s\" modbus-addr=\"%d\" type=\"%s\"report=\"%s\" = %d",
+				logger(LOG_DEBUG, "Bool Variable: name=\"%s\" modbus-addr=\"%d\" type=\"%s\"report=\"%s\" = %s",
 						nextListElem->variable.name,
 						nextListElem->variable.addr,
 						VariableDataTypes_STRING[nextListElem->variable.datatype],
 						VariableReportTypes_STRING[nextListElem->variable.reporttype],
-						dest );
+						dest ? "true" : "false" );
+			} else if (nextListElem->variable.datatype == NUMBER) {
+				uint16_t dest;
+				int ret = modbus_read_registers(mb,nextListElem->variable.addr, 1, &dest);
+				logger(LOG_DEBUG, "INT Variable: name=\"%s\" modbus-addr=\"%d\" type=\"%s\"report=\"%s\" = %d",
+						nextListElem->variable.name,
+						nextListElem->variable.addr,
+						VariableDataTypes_STRING[nextListElem->variable.datatype],
+						VariableReportTypes_STRING[nextListElem->variable.reporttype],
+						dest);
+			} else {
+				logger(LOG_WARNING, "Unknown variable to poll from Modbus");
 			}
-
-
 
 			nextListElem = nextListElem->next;
 		}

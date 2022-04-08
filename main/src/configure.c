@@ -31,7 +31,7 @@ t_mqtt_modes xml2MqttModes(mxml_node_t *node) {
 }
 
 t_variable_data_types str2DataType(const char *type) {
-	if(!strncmp( type, "INT", 5)) return INT;
+	if(!strncmp( type, "NUMBER", 5)) return NUMBER;
 	if(!strncmp( type, "BOOL", 4)) return BOOL;
 	return DAT_UNKNOWN;
 }

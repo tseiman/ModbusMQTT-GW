@@ -16,7 +16,7 @@
 		<variable name="delay" modbus-addr="12289" type="BOOL" report="ONDEBUG"/>
 		<variable name="blink_run" modbus-addr="12290" type="BOOL" report="INSTANT"></variable>
 		<variable name="delay_run" modbus-addr="12291" type="BOOL" report="INSTANT"/>
-		<variable name="blink_count" modbus-addr="1238" type="INT" report="INSTANT"/>
-		<variable name="delay_count" modbus-addr="1239" type="INT" report="INSTANT"/>
+		<variable name="blink_count" modbus-addr="12290" type="NUMBER" report="INSTANT"/>
+		<variable name="delay_count" modbus-addr="12289" type="NUMBER" report="INSTANT"/>
 	</variables>
 </mmgw-config>
