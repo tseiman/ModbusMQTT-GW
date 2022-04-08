@@ -42,12 +42,12 @@ typedef struct MqttSettings {
 
 typedef enum VariableDataTypes {
 	BOOL,
-	DWORD,
+	INT,
 	DAT_UNKNOWN
 } t_variable_data_types;
 
 static const char *VariableDataTypes_STRING[] = {
-    "BOOL", "DWORD", "DAT_UNKNOWN"
+    "BOOL", "INT", "DAT_UNKNOWN"
 };
 
 typedef enum VariableReportTypes {
@@ -85,7 +85,7 @@ typedef struct Settings {
 } Settings;
 typedef Settings *Settings_P;
 
-int loadConfig(char *config_file);
+int loadConfig(char *config_file, int verbose);
 static void toString();
 Settings_P getConfig();
 void destroyConfig();

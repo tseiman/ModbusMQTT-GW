@@ -4,7 +4,10 @@
 #include <stdio.h>
 #include <strings.h>
 #include <getopt.h>
+#include <signal.h>
+#include <pthread.h>
 
+#include "../inc/modbus_runner.h"
 #include "configure.h"
 #include "log.h"
 
@@ -24,6 +27,11 @@ static void printHelp() {
 }
 
 
+static void signalHandler(int signal) {
+        logger(LOG_DEBUG, "Fetched exit signal");
+        disconnectModbus();
+}
+
 int main (int argc, char *argv[] ) {
 
 
@@ -34,6 +42,9 @@ int main (int argc, char *argv[] ) {
 	int forceunlock = -1;
 
 	opterr = 0;
+
+    logger(LOG_INFO, "Start ModbusMQTT GW");
+
 
 	while (1) {
 		static struct option long_options[] = {
@@ -75,19 +86,25 @@ int main (int argc, char *argv[] ) {
 
 
 
-	if ((ret = loadConfig(config ? config : "/etc/mmgw-config.xml"))) {
+	if ((ret = loadConfig(config ? config : "/etc/mmgw-config.xml", verbose >= 0 ? verbose : 0))) {
 		destroyConfig();
 		return ret;
 	}
 	openLog(getConfig());
-
-	if (verbose >= 0) getConfig()->verbose = verbose;
-
-
 	getConfig()->toString();
+
+	signal(SIGINT, signalHandler);
+
+	if((ret = connectModbus(getConfig()))) {
+		logger(LOG_ERR, "Wasn't able to connect Modbus!");
+		destroyConfig();
+		return ret;
+	}
+
+	waitForModbusThread();
+    logger(LOG_INFO, "Exiting ModbusMQTT GW");
+
 //	daemonRun(getConf(), argc, argv);
-
-
 	destroyConfig();
 
 

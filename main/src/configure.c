@@ -2,7 +2,7 @@
  * configure.c
  *
  *  Created on: Mar 29, 2022
- *      Author: tseiman
+ *      Author: T. Schmidt.
  */
 
 #include <errno.h>
@@ -31,7 +31,7 @@ t_mqtt_modes xml2MqttModes(mxml_node_t *node) {
 }
 
 t_variable_data_types str2DataType(const char *type) {
-	if(!strncmp( type, "DWORD", 5)) return DWORD;
+	if(!strncmp( type, "INT", 5)) return INT;
 	if(!strncmp( type, "BOOL", 4)) return BOOL;
 	return DAT_UNKNOWN;
 }
@@ -74,7 +74,7 @@ static void toString() {
 
 }
 
-int loadConfig(char *config_file) {
+int loadConfig(char *config_file, int verbose) {
 
 	FILE *fp;
 	char cwd[PATH_MAX];
@@ -92,6 +92,7 @@ int loadConfig(char *config_file) {
 		return ENOENT; // not such file
 	}
 	conf = my_malloc(sizeof(Settings));
+	conf->verbose = verbose;
 	conf->variablelist = NULL;
 	conf->toString = toString;
 
@@ -155,6 +156,7 @@ Settings_P getConfig() {
 
 void destroyConfig() {
 	if(xmltree) mxmlDelete(xmltree);
+	if(!conf) return;
 	if(conf->variablelist) {
 		while(conf->variablelist) {
 			t_variable_list_P nextListElem = conf->variablelist->next;
